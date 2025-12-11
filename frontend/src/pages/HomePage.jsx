@@ -11,21 +11,26 @@ const HomePage = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [repos, setRepos] = useState([]);
   const [loading, setLoading] = useState(false);
+
   const [sortType, setSortType] = useState('recent');
-  //`https://api.github.com/users/${username}`
+
   const getUserProfileAndRepos = useCallback(
     async (username = 'ahmedabelrahman-dev') => {
       setLoading(true);
       try {
-        const userRes = await fetch(`https://api.github.com/users/${username}`);
-        const userProfile = await userRes.json();
-        setUserProfile(userProfile);
-        //TODO: sort repos based on sortType after backend sorting
-        // repos.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); //descending, recent first
-        const reposRes = await fetch(userProfile.repos_url);
-        const repos = await reposRes.json();
+        const res = await fetch(`/api/users/profile/${username}`);
+        const data = await res.json();
+
+        // Fix: backend returns data.repos or data.items
+        const repos = data.repos || data.items || [];
+        const userProfile = data.userProfile || data.user || null;
+
+        repos.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
         setRepos(repos);
-        console.log(userProfile, repos);
+        setUserProfile(userProfile);
+
+        return { userProfile, repos };
       } catch (error) {
         toast.error(error.message);
       } finally {

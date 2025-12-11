@@ -13,12 +13,10 @@ const ExplorePage = () => {
     setLoading(true);
     setRepos([]);
     try {
-      const res = await fetch(
-        `https://api.github.com/search/repositories?q=language:${language}&sort=stars&order=desc&per_page=10`
-      );
+      const res = await fetch('/api/explore/repos/' + language);
       const data = await res.json();
 
-      setRepos(data.items || []); // safe fallback
+      setRepos(data.repos || []); // safe fallback
       setSelectedLanguage(language);
     } catch (error) {
       toast.error(error.message);
